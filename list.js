@@ -3,7 +3,9 @@ var Task = React.createClass({
     render: function() {
         return (
             <li className="task">
+                <span className="img-task" onClick={this.props.onTaskComplete}></span>
                 {this.props.children}
+                <span className="remove-task">×</span>
             </li>
         )
     }
@@ -12,7 +14,9 @@ var Task = React.createClass({
 
 var Lists = React.createClass({
 
+
     render: function() {
+        var onComplete = this.props.onTaskComplete;
 
         return (
             <ul className="list-items">
@@ -21,6 +25,7 @@ var Lists = React.createClass({
                         return (
                             <Task
                                 key={task.id}
+                                onTaskComplete={onComplete.bind(null, task)}
                             >
                                 {task.text}
                             </Task>
@@ -52,7 +57,8 @@ var ListEditor = React.createClass({
 
             var newTask = {
                 text: this.state.text,
-                id: Date.now()
+                id: Date.now(),
+                status: false
             };
 
             if (newTask.text.trim().length > 0) {
@@ -115,12 +121,26 @@ var ToDoApp = React.createClass({
         });
     },
 
+    handleTaskComplete: function(task) {
+        var newTasks = this.state.list.slice();
+
+        newTasks.forEach(function(el) {
+            if (el.id === task.id) {
+                el.status = !task.status
+            }
+        });
+
+        this.setState({
+            list: newTasks
+        });
+    },
+
     render: function() {
         return (
         <div className="todo-app">
 
             <ListEditor onTaskAdd={this.handleTaskAdd} />
-            <Lists list={this.state.list} onTaskDelete={this.handleTaskDelete} />
+            <Lists list={this.state.list} onTaskComplete={this.handleTaskComplete} />
         </div>
         );
     },
