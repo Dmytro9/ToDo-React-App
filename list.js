@@ -2,7 +2,7 @@ var Task = React.createClass({
 
     render: function() {
         return (
-            <li className="task">
+            <li className={this.props.forClass} >
                 <span className="img-task" onClick={this.props.onTaskComplete}></span>
                 {this.props.children}
                 <span className="remove-task">×</span>
@@ -26,6 +26,7 @@ var Lists = React.createClass({
                             <Task
                                 key={task.id}
                                 onTaskComplete={onComplete.bind(null, task)}
+                                forClass={task.status}
                             >
                                 {task.text}
                             </Task>
