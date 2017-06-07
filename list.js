@@ -1,3 +1,16 @@
+var FilterList = React.createClass({
+
+    render: function() {
+        return (
+            <div className="filter-list">
+                <span className="active" onClick={this.props.showAll}>All</span>
+                <span onClick={this.props.showNew}>New</span>
+                <span onClick={this.props.showCompleted}>Completed</span>
+            </div>
+        )
+    }
+});
+
 var Task = React.createClass({
 
     render: function() {
@@ -5,7 +18,7 @@ var Task = React.createClass({
             <li className={this.props.forClass} >
                 <span className="img-task" onClick={this.props.onTaskComplete}></span>
                 {this.props.children}
-                <span className="remove-task">×</span>
+                <span className="remove-task" onClick={this.props.onTaskDelete}>×</span>
             </li>
         )
     }
@@ -16,7 +29,8 @@ var Lists = React.createClass({
 
 
     render: function() {
-        var onComplete = this.props.onTaskComplete;
+        var onComplete = this.props.onTaskComplete,
+            onTaskDelete = this.props.onTaskDelete;
 
         return (
             <ul className="list-items">
@@ -26,6 +40,7 @@ var Lists = React.createClass({
                             <Task
                                 key={task.id}
                                 onTaskComplete={onComplete.bind(null, task)}
+                                onTaskDelete={onTaskDelete.bind(null, task)}
                                 forClass={task.status}
                             >
                                 {task.text}
@@ -108,7 +123,9 @@ var ToDoApp = React.createClass({
     },
 
     componentDidUpdate: function() {
-        this._updateLocalStorage();
+        if (!this.newList) {
+            this._updateLocalStorage();
+        }
     },
 
     handleTaskAdd: function(newTask) {
@@ -136,12 +153,74 @@ var ToDoApp = React.createClass({
         });
     },
 
+    handleTaskDelete: function(task) {
+        var taskId = task.id;
+
+        var newList = this.state.list.filter(function(task){
+            return  task.id !== taskId;
+        });
+
+        this.setState({
+            list: newList
+        });
+    },
+
+    handleShowCompleted: function() {
+        if (!this.copyList) {
+            this.copyList = this.state.list.slice();
+        }
+
+        var newTask = this.copyList.filter(function(task) {
+            return task.status;
+        });
+
+        this.setState({
+            list: newTask
+        });
+        console.log( 'hello' );
+    },
+
+
+    handleShowNew: function() {
+        if (!this.copyList) {
+            this.copyList = this.state.list.slice();
+        }
+
+        var newTask = this.copyList.filter(function(task) {
+                return !task.status;
+        });
+
+        this.setState({
+            list: newTask
+        });
+    },
+
+    handleShowAll: function() {
+        if (!this.copyList) {
+            this.copyList = this.state.list.slice();
+        }
+
+        var newTask = this.copyList.slice();
+        this.copyList = null;
+
+        this.setState({
+            list: newTask
+        });
+    },
+
     render: function() {
         return (
         <div className="todo-app">
 
             <ListEditor onTaskAdd={this.handleTaskAdd} />
-            <Lists list={this.state.list} onTaskComplete={this.handleTaskComplete} />
+
+            <Lists list={this.state.list}
+                   onTaskComplete={this.handleTaskComplete}
+                   onTaskDelete={this.handleTaskDelete} />
+
+            <FilterList showCompleted={this.handleShowCompleted}
+                        showNew={this.handleShowNew}
+                        showAll={this.handleShowAll} />
         </div>
         );
     },

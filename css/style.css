@@ -1,5 +1,6 @@
 * {
     box-sizing: border-box;
+    font-family: sans-serif;
 }
 .todo-app {
     max-width: 640px;
@@ -10,7 +11,8 @@
 ul {
     list-style-type: none;
     margin: 0;
-    padding: 40px 20px;
+    padding: 34px 20px 20px;
+    border-bottom: 4px solid #ccc;
 }
 ul li {
     margin-bottom: 20px;
@@ -41,6 +43,10 @@ li span:last-child:hover {
 .true .img-task {
     background-position: -50px 0;
 }
+.true span:nth-child(2) {
+    text-decoration: line-through;
+    color: #ccc;
+}
 input {
     border: none;
     border-bottom: 3px solid #ccc;
@@ -49,4 +55,21 @@ input {
     padding-left: 20px;
     font-size: 26px;
     outline: none;
+}
+.filter-list {
+    display: flex;
+    justify-content: center;
+}
+.filter-list span {
+    margin: 15px 20px;
+    font-size: 26px;
+    cursor: pointer;
+    color: #797373;
+}
+.filter-list span:hover {
+    color: #000;
+}
+.filter-list span.active {
+    font-weight: 700;
+    color: #000;
 }
