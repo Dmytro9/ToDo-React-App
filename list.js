@@ -5,7 +5,7 @@ var Task = React.createClass({
             <li className={this.props.forClass} >
                 <span className="img-task" onClick={this.props.onTaskComplete}></span>
                 {this.props.children}
-                <span className="remove-task">×</span>
+                <span className="remove-task" onClick={this.props.onTaskDelete}>×</span>
             </li>
         )
     }
@@ -17,6 +17,7 @@ var Lists = React.createClass({
 
     render: function() {
         var onComplete = this.props.onTaskComplete;
+        var onTaskDelete = this.props.onTaskDelete;
 
         return (
             <ul className="list-items">
@@ -26,6 +27,7 @@ var Lists = React.createClass({
                             <Task
                                 key={task.id}
                                 onTaskComplete={onComplete.bind(null, task)}
+                                onTaskDelete={onTaskDelete.bind(null, task)}
                                 forClass={task.status}
                             >
                                 {task.text}
@@ -85,24 +87,48 @@ var ListEditor = React.createClass({
 
 
 
+var SortItem = React.createClass({
+
+    render: function() {
+
+        var sortBtn = ['all', 'new', 'completed'],
+            handleTaskSort = this.props.doSort,
+            currentFilter = this.props.currentFilter;
+
+        return (
+            <div className="sort-items">
+                {
+                    sortBtn.map(item =>
+                        <span
+                            key={item}
+                            className={item === currentFilter ? 'active' : ''}
+                            onClick={handleTaskSort.bind(null, item)}
+                        >
+                            {item}
+                        </span>
+                    )
+                }
+            </div>
+        )
+    }
+});
+
 
 var ToDoApp = React.createClass({
 
     getInitialState: function() {
         return {
             list: [],
-            listBackUp: []
+            filter: 'all'
         };
     },
 
     componentDidMount: function() {
-        var list = JSON.parse(localStorage.getItem('list')),
-            listBackUp = JSON.parse(localStorage.getItem('listBackUp'));
+        var list = JSON.parse(localStorage.getItem('list'));
 
         if (list) {
             this.setState({
-                list: list,
-                listBackUp: listBackUp
+                list: list
             });
         }
     },
@@ -117,8 +143,7 @@ var ToDoApp = React.createClass({
 
         newList.unshift(newTask);
         this.setState({
-            list: newList,
-            listBackUp: newList
+            list: newList
         });
     },
 
@@ -136,30 +161,63 @@ var ToDoApp = React.createClass({
         });
     },
 
+    handleTaskDelete: function(el) {
+        var newTasks = this.state.list.slice();
+
+        var newList = newTasks.filter(function(task) {
+            return  task.id !== el.id;
+        });
+
+        this.setState({
+            list: newList
+        });
+    },
+
+    handleTaskSort: function(filter) {
+        this.setState({
+            filter: filter
+        });
+    },
+
     render: function() {
         return (
         <div className="todo-app">
 
             <ListEditor onTaskAdd={this.handleTaskAdd} />
-            <Lists list={this.state.list} onTaskComplete={this.handleTaskComplete} />
+            <Lists list={this.state.list}
+                   onTaskComplete={this.handleTaskComplete}
+                   onTaskDelete={this.handleTaskDelete}
+                   list={this._getVisibleToDos(this.state.list, this.state.filter)} />
+            <SortItem doSort={this.handleTaskSort}
+                      currentFilter={this.state.filter}  />
         </div>
         );
     },
 
-    _updateLocalStorage: function() {
+    _getVisibleToDos(list, filter) {
 
-        var list = JSON.stringify(this.state.list),
-            listBackUp = JSON.stringify(this.state.listBackUp);
+        switch(filter) {
 
-        localStorage.setItem('list', list);
-        localStorage.setItem('listBackUp', listBackUp);
+            case "completed":
+                return list.filter(task => task.status);
+                break;
+
+            case "new":
+                return list.filter(task => !task.status);
+                break;
+
+            default:
+                return list
+        }
     },
 
+    _updateLocalStorage: function() {
+
+        var list = JSON.stringify(this.state.list);
+        localStorage.setItem('list', list);
+    }
+
 });
-
-
-
-
 
 
 ReactDOM.render(
