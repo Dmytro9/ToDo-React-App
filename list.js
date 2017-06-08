@@ -1,16 +1,3 @@
-var FilterList = React.createClass({
-
-    render: function() {
-        return (
-            <div className="filter-list">
-                <span className="active" onClick={this.props.showAll}>All</span>
-                <span onClick={this.props.showNew}>New</span>
-                <span onClick={this.props.showCompleted}>Completed</span>
-            </div>
-        )
-    }
-});
-
 var Task = React.createClass({
 
     render: function() {
@@ -29,8 +16,8 @@ var Lists = React.createClass({
 
 
     render: function() {
-        var onComplete = this.props.onTaskComplete,
-            onTaskDelete = this.props.onTaskDelete;
+        var onComplete = this.props.onTaskComplete;
+        var onTaskDelete = this.props.onTaskDelete;
 
         return (
             <ul className="list-items">
@@ -100,32 +87,54 @@ var ListEditor = React.createClass({
 
 
 
+var SortItem = React.createClass({
+
+    render: function() {
+
+        var sortBtn = ['all', 'new', 'completed'],
+            handleTaskSort = this.props.doSort,
+            currentFilter = this.props.currentFilter;
+
+        return (
+            <div className="sort-items">
+                {
+                    sortBtn.map(item =>
+                        <span
+                            key={item}
+                            className={item === currentFilter ? 'active' : ''}
+                            onClick={handleTaskSort.bind(null, item)}
+                        >
+                            {item}
+                        </span>
+                    )
+                }
+            </div>
+        )
+    }
+});
+
 
 var ToDoApp = React.createClass({
 
     getInitialState: function() {
         return {
             list: [],
-            listBackUp: []
+            filter: 'all'
         };
     },
 
     componentDidMount: function() {
-        var list = JSON.parse(localStorage.getItem('list')),
-            listBackUp = JSON.parse(localStorage.getItem('listBackUp'));
+        var list = JSON.parse(localStorage.getItem('list'));
 
         if (list) {
             this.setState({
-                list: list,
-                listBackUp: listBackUp
+                list: list
             });
         }
     },
 
     componentDidUpdate: function() {
-        if (!this.newList) {
-            this._updateLocalStorage();
-        }
+        this._updateLocalStorage();
     },
 
     handleTaskAdd: function(newTask) {
@@ -134,8 +143,7 @@ var ToDoApp = React.createClass({
 
         newList.unshift(newTask);
         this.setState({
-            list: newList,
-            listBackUp: newList
+            list: newList
         });
     },
 
@@ -153,11 +161,11 @@ var ToDoApp = React.createClass({
         });
     },
 
-    handleTaskDelete: function(task) {
-        var taskId = task.id;
+    handleTaskDelete: function(el) {
+        var newTasks = this.state.list.slice();
 
-        var newList = this.state.list.filter(function(task){
-            return  task.id !== taskId;
+        var newList = newTasks.filter(function(task) {
+            return  task.id !== el.id;
         });
 
         this.setState({
@@ -165,46 +173,9 @@ var ToDoApp = React.createClass({
         });
     },
 
-    handleShowCompleted: function() {
-        if (!this.copyList) {
-            this.copyList = this.state.list.slice();
-        }
-
-        var newTask = this.copyList.filter(function(task) {
-            return task.status;
-        });
-
+    handleTaskSort: function(filter) {
         this.setState({
-            list: newTask
-        });
-        console.log( 'hello' );
-    },
-
-
-    handleShowNew: function() {
-        if (!this.copyList) {
-            this.copyList = this.state.list.slice();
-        }
-
-        var newTask = this.copyList.filter(function(task) {
-                return !task.status;
-        });
-
-        this.setState({
-            list: newTask
-        });
-    },
-
-    handleShowAll: function() {
-        if (!this.copyList) {
-            this.copyList = this.state.list.slice();
-        }
-
-        var newTask = this.copyList.slice();
-        this.copyList = null;
-
-        this.setState({
-            list: newTask
+            filter: filter
         });
     },
 
@@ -213,32 +184,40 @@ var ToDoApp = React.createClass({
         <div className="todo-app">
 
             <ListEditor onTaskAdd={this.handleTaskAdd} />
-
             <Lists list={this.state.list}
                    onTaskComplete={this.handleTaskComplete}
-                   onTaskDelete={this.handleTaskDelete} />
-
-            <FilterList showCompleted={this.handleShowCompleted}
-                        showNew={this.handleShowNew}
-                        showAll={this.handleShowAll} />
+                   onTaskDelete={this.handleTaskDelete}
+                   list={this._getVisibleToDos(this.state.list, this.state.filter)} />
+            <SortItem doSort={this.handleTaskSort}
+                      currentFilter={this.state.filter}  />
         </div>
         );
     },
 
-    _updateLocalStorage: function() {
+    _getVisibleToDos(list, filter) {
 
-        var list = JSON.stringify(this.state.list),
-            listBackUp = JSON.stringify(this.state.listBackUp);
+        switch(filter) {
 
-        localStorage.setItem('list', list);
-        localStorage.setItem('listBackUp', listBackUp);
+            case "completed":
+                return list.filter(task => task.status);
+                break;
+
+            case "new":
+                return list.filter(task => !task.status);
+                break;
+
+            default:
+                return list
+        }
     },
 
+    _updateLocalStorage: function() {
+
+        var list = JSON.stringify(this.state.list);
+        localStorage.setItem('list', list);
+    }
+
 });
-
-
-
-
 
 
 ReactDOM.render(

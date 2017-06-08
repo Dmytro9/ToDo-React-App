@@ -1,6 +1,6 @@
 * {
     box-sizing: border-box;
-    font-family: sans-serif;
+    font-family: FontAwesome, sans-serif;
 }
 .todo-app {
     max-width: 640px;
@@ -11,8 +11,9 @@
 ul {
     list-style-type: none;
     margin: 0;
-    padding: 34px 20px 20px;
+    padding: 40px 20px 20px;
     border-bottom: 4px solid #ccc;
+    min-height: 240px;
 }
 ul li {
     margin-bottom: 20px;
@@ -43,33 +44,31 @@ li span:last-child:hover {
 .true .img-task {
     background-position: -50px 0;
 }
-.true span:nth-child(2) {
-    text-decoration: line-through;
-    color: #ccc;
-}
 input {
     border: none;
     border-bottom: 3px solid #ccc;
     height: 75px;
     width: 100%;
     padding-left: 20px;
-    font-size: 26px;
+    font-size: 30px;
     outline: none;
 }
-.filter-list {
+.sort-items span.active {
+    color: #000;
+}
+.sort-items {
+    padding: 20px;
     display: flex;
     justify-content: center;
 }
-.filter-list span {
-    margin: 15px 20px;
-    font-size: 26px;
+.sort-items span {
+    padding: 0 15px;
+    text-transform: uppercase;
     cursor: pointer;
-    color: #797373;
+    color: #ccc;
+    font-weight: 900;
+    letter-spacing: 0.1em;
 }
-.filter-list span:hover {
-    color: #000;
-}
-.filter-list span.active {
-    font-weight: 700;
+.sort-items span:hover {
     color: #000;
 }
