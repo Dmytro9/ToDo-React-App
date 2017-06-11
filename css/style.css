@@ -72,3 +72,7 @@ input {
 .sort-items span:hover {
     color: #000;
 }
+.true span:nth-child(2) {
+    color: #ccc;
+    text-decoration: line-through;
+}
